@@ -89,7 +89,7 @@ fn info_fields(dict: &Dictionary) -> Vec<(String, String)> {
 /// PDF text strings are UTF-16BE (with a BOM) or a Latin-1-like encoding.
 fn decode(b: &[u8]) -> String {
     if let Some(rest) = b.strip_prefix(&[0xFE, 0xFF]) {
-        let units: Vec<u16> = rest.chunks_exact(2).map(|c| u16::from_be_bytes([c[0], c[1]])).collect();
+        let units: Vec<u16> = rest.as_chunks::<2>().0.iter().map(|c| u16::from_be_bytes(*c)).collect();
         show(String::from_utf16_lossy(&units).as_bytes())
     } else if b.starts_with(&[0xEF, 0xBB, 0xBF]) {
         show(&b[3..])
