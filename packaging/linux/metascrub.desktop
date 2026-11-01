@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=metascrub
+Comment=Remove hidden metadata from photos and documents
+Exec=metascrub %F
+Icon=metascrub
+Terminal=false
+Categories=Utility;
+StartupWMClass=metascrub
+MimeType=image/jpeg;image/png;image/webp;image/gif;application/pdf;application/vnd.openxmlformats-officedocument.wordprocessingml.document;application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;application/vnd.openxmlformats-officedocument.presentationml.presentation;

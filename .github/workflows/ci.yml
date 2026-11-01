@@ -1,0 +1,75 @@
+name: CI
+
+# Every push / pull request: lint and test.
+# Pushing a version tag (git tag v0.1.0 && git push --tags): also build the
+# Windows, Linux and macOS downloads and attach them to a GitHub release.
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - run: cargo clippy --workspace --all-targets -- -D warnings
+      - run: cargo test --workspace
+
+  windows:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: test
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo build --release -p metascrub -p metascrub-cli
+      - name: Package
+        shell: bash
+        run: |
+          mkdir dist
+          cp target/release/metascrub.exe dist/metascrub-windows-x86_64.exe
+          cp target/release/metascrub-cli.exe dist/metascrub-cli-windows-x86_64.exe
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+
+  linux:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: test
+    # Built on the oldest supported Ubuntu so the AppImage also runs on older distros.
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo build --release -p metascrub -p metascrub-cli
+      - name: AppImage
+        run: VERSION="${GITHUB_REF_NAME#v}" bash packaging/linux/build-appimage.sh
+      - name: Command-line tool
+        run: tar -czf dist/metascrub-cli-linux-x86_64.tar.gz -C target/release metascrub-cli
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+
+  macos:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: test
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: App, disk image and command-line tool
+        run: VERSION="${GITHUB_REF_NAME#v}" bash packaging/macos/build-dmg.sh
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*

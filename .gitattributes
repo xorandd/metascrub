@@ -1,0 +1,4 @@
+# Keep Unix line endings in scripts even when committed from Windows.
+*.sh      text eol=lf
+*.desktop text eol=lf
+*.yml     text eol=lf
