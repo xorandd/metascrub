@@ -3,7 +3,7 @@
 **Remove the hidden data in your photos and documents before you share them.**
 GPS location, camera serial numbers, author names, edit history: gone, in one drag-and-drop.
 
-<!-- TODO: put a demo GIF here: drop a photo in, see "GPS location: 50.45, 30.52 removed" -->
+![metascrub demo: dropping a photo removes its GPS location and camera details](assets/demo.gif)
 
 ```
 $ metascrub-cli holiday.jpg
